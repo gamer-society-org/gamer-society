@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="History",
+            name="BetType",
             fields=[
                 (
                     "id",
@@ -23,7 +23,15 @@ class Migration(migrations.Migration):
                         serialize=False,
                     ),
                 ),
-                ("balance", models.FloatField(default=0.0)),
+                ("total_value", models.FloatField(blank=True, default=0.0)),
+                ("odd", models.FloatField(blank=True, default=0.0)),
+                ("team", models.CharField(max_length=120)),
+                (
+                    "winner",
+                    models.CharField(
+                        blank=True, default=None, max_length=120, null=True
+                    ),
+                ),
             ],
         ),
     ]

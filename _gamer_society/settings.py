@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os
 import dotenv
+import dj_database_url
 
 from pathlib import Path
 
@@ -30,7 +31,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['gamers-society.herokuapp.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -47,7 +48,11 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
+<<<<<<< HEAD
     "django_extensions",
+=======
+    'drf_spectacular',
+>>>>>>> 5cb336a01fba60ab166e400c8e583e333d28703c
 ]
 
 MY_APPS = [
@@ -57,6 +62,9 @@ MY_APPS = [
     "teams",
     "historys",
     "transactions",
+    "bets",
+    "bet_types",
+    "user_bets"
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + MY_APPS
@@ -89,6 +97,18 @@ TEMPLATES = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Gamers Society',
+    'DESCRIPTION': 'Create or join championships with your team with great prizes. GS has a bet system to championship games, so come with us have fun and make money',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
+}
+
 WSGI_APPLICATION = "_gamer_society.wsgi.application"
 
 
@@ -110,7 +130,13 @@ DATABASES = {
     },
 }
 
+DATABASE_URL = os.getenv("DATABASE_URL")
 
+if DATABASE_URL:
+    db = dj_database_url.config(default=DATABASE_URL)
+    DATABASES['default'].update(db)
+    DEBUG = False
+    
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 

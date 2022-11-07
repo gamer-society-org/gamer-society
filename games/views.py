@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.authentication import TokenAuthentication
 from utils.permissions import IsStaff
-
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .permissions import (
     IsStaffCampOwner,
@@ -9,10 +9,15 @@ from .permissions import (
     RequestMethodIsPut,
     IsDateAfterChampInitialDate,
     IsInitialDateInFuture,
+    IsThere8TeamsInCamp
+    IsValidTeam,
+    IsTeam1And2TheSame
+
 )
 
 from utils.mixins import SerializerByMethodMixin
 from .models import Game
+from bet_types.models import BetType
 from .serializers import (
     GameUpdateSerializer,
     GameWinnerSerializer,
@@ -22,9 +27,7 @@ from teams.models import Team
 from championships.models import Championship
 from utils.game_name_phase import Phase
 from users.models import User
-from historys.models import History
-from transactions.models import Transaction
-import datetime
+from bets.models import Bet
 from transactions.serializers import TransactionSerializer
 
 
@@ -38,13 +41,37 @@ class UpdateTeamsGameView(generics.UpdateAPIView):
     permission_classes = [
         RequestMethodIsPut,
         IsStaffCampOwner,
+        IsThere8TeamsInCamp,
         IsDateAfterChampInitialDate,
         IsInitialDateInFuture,
+        IsValidTeam,
+        IsTeam1And2TheSame
     ]
 
     lookup_url_kwarg = "game_id"
     queryset = Game.objects.all()
     serializer_class = GameUpdateSerializer
+
+    def put(self, request, *args, **kwargs):
+        game = self.update(request, *args, **kwargs)
+        game_obj = Game.objects.get(id=game.data['id'])
+
+        game.data["championship"]
+        bet = {
+            "team_1": game.data["team_1"],
+            "team_2": game.data["team_2"]
+        }
+        bet_created = Bet.objects.create(**bet, game=game_obj)
+        bet_type_1 = {
+            "team": game.data["team_1"]
+        }
+        bet_type_2 = {
+            "team": game.data["team_2"]
+        }
+        BetType.objects.create(**bet_type_1, bet=bet_created)
+        BetType.objects.create(**bet_type_2, bet=bet_created)
+        
+        return game
 
     def check_has_date_permission(self, request, obj):
         for permission in self.get_permissions():
@@ -123,3 +150,11 @@ class UpdateGameWinnerView(generics.UpdateAPIView):
         # TRIGGER TO CLOSE GAME BET AND GIVE MONEY
 
         return game
+
+
+class RetrieveGameView(generics.RetrieveAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_url_kwarg = "game_id"
+    queryset = Game.objects.all()
+    serializer_class = GamesToBetSerializer
