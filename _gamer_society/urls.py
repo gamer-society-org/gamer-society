@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from scripts import test
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -23,5 +24,7 @@ urlpatterns = [
     path("api/", include("teams.urls")),
     path("api/", include("games.urls")),
     path("api/", include("transactions.urls")),
-    path("api/", include("historys.urls"))
+    path("api/", include("historys.urls")),
 ]
+
+test.run()
