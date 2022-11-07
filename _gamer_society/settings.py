@@ -48,11 +48,8 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
-<<<<<<< HEAD
     "django_extensions",
-=======
     'drf_spectacular',
->>>>>>> 5cb336a01fba60ab166e400c8e583e333d28703c
 ]
 
 MY_APPS = [
