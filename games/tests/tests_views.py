@@ -49,7 +49,7 @@ class GamesViewTest(TestCase):
         cls.team_data = {
             "name": "Imperial",
             "initials": "IMP",
-            "e_sports": "Counter Strike",
+            "e_sport": "Counter Strike",
             "wins": 0,
             "losses": 0,
         }

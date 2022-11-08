@@ -42,7 +42,7 @@ class ChampionshipModelTest(TestCase):
         games_queryset_size = champ.games.count()
         game_instance = champ.games.last()
         
-        self.assertEqual(11, games_queryset_size)
+        self.assertEqual(14, games_queryset_size)
         self.assertIsInstance(game_instance, Game)
         self.assertEqual(201, response.status_code)
 
