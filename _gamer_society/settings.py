@@ -53,7 +53,8 @@ THIRD_PARTY_APPS = [
 
 MY_APPS = [
     "users",
-    "games",
+    # "games",
+    "games.apps.GamesConfig",
     "championships",
     "teams",
     "historys",
