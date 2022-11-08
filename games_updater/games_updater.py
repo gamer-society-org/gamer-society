@@ -8,14 +8,8 @@ from championships.models import Championship
 
 def update_games():
     print("="*150)
-    print("Server executando")
+    print("Server executando, looping rodando")
     print("="*150)
-    # prize = {"value": 100}
-    # user_to_reward = User.objects.get(username="Gus")
-    # trans = TransactionSerializer(data=prize)
-    # trans.is_valid(raise_exception=True)
-    # trans.save(user=user_to_reward)
-    
     
     # GAMES INITIAL DATE VERIFICATION
     games = Game.objects.exclude(initial_date=None)
@@ -33,14 +27,27 @@ def update_games():
                 bet_to_close.save()
             
     # CHAMPIONSHIP HAS 8 GAMES VERIFICATION
-    
     champs_all = Championship.objects.all()
     
     for champ in champs_all:
         if champ.teams.count() == 8:
-            # EMBARALHAR TIMES ENTRE OS QUATER_UPPER GAMES
-            ...        
-    
+            game_to_avaliate = Game.objects.get(phase=Phase.QUARTERS_UPPER, name=Names.GAME_1, championship=champ)
+            if game_to_avaliate.team_1 == None:
+                # EMBARALHAR TIMES ENTRE OS QUATER_UPPER GAMES
+                teams_champ = [c for c in champ.teams]
+                teams_champ.sort()
+                game_to_update = Game.objects.get(phase=Phase.QUARTERS_UPPER, name=Names.GAME_1, championship=champ)
+                game_to_update.team_1 = teams_champ[0]
+                game_to_update.team_2 = teams_champ[1]
+                game_to_update = Game.objects.get(phase=Phase.QUARTERS_UPPER, name=Names.GAME_2, championship=champ)
+                game_to_update.team_1 = teams_champ[2]
+                game_to_update.team_2 = teams_champ[3]
+                game_to_update = Game.objects.get(phase=Phase.QUARTERS_UPPER, name=Names.GAME_3, championship=champ)
+                game_to_update.team_1 = teams_champ[4]
+                game_to_update.team_2 = teams_champ[5]
+                game_to_update = Game.objects.get(phase=Phase.QUARTERS_UPPER, name=Names.GAME_4, championship=champ)
+                game_to_update.team_1 = teams_champ[6]
+                game_to_update.team_2 = teams_champ[7]
             
     # GAMES WINNER VERIFICATION
     champs = Championship.objects.all()
@@ -63,8 +70,8 @@ def update_games():
                         winner_id = game.team_2
                         looser_id = game.team_1
                     
-                    game_to_update_upper = Game.objects.filter(phase=Phase.SEMI_UPPER, name=Names.GAME_1, championship=champ)
-                    game_to_update_lower = Game.objects.filter(phase=Phase.SEMI_LOWER_1, name=Names.GAME_1, championship=champ)
+                    game_to_update_upper = Game.objects.get(phase=Phase.SEMI_UPPER, name=Names.GAME_1, championship=champ)
+                    game_to_update_lower = Game.objects.get(phase=Phase.SEMI_LOWER_1, name=Names.GAME_1, championship=champ)
                     if game_to_update_upper.team_1 == None:
                         game_to_update_upper.team_1 = winner_id
                         game_to_update_upper.save()
@@ -84,8 +91,8 @@ def update_games():
                         winner_id = game.team_2
                         looser_id = game.team_1
                     
-                    game_to_update_upper = Game.objects.filter(phase=Phase.SEMI_UPPER, name=Names.GAME_1, championship=champ)
-                    game_to_update_lower = Game.objects.filter(phase=Phase.SEMI_LOWER_1, name=Names.GAME_1, championship=champ)
+                    game_to_update_upper = Game.objects.get(phase=Phase.SEMI_UPPER, name=Names.GAME_1, championship=champ)
+                    game_to_update_lower = Game.objects.get(phase=Phase.SEMI_LOWER_1, name=Names.GAME_1, championship=champ)
                     if game_to_update_upper.team_2 == None:
                         game_to_update_upper.team_2 = winner_id
                         game_to_update_upper.save()
@@ -104,8 +111,8 @@ def update_games():
                         winner_id = game.team_2
                         looser_id = game.team_1
                     
-                    game_to_update_upper = Game.objects.filter(phase=Phase.SEMI_UPPER, name=Names.GAME_2, championship=champ)
-                    game_to_update_lower = Game.objects.filter(phase=Phase.SEMI_LOWER_1, name=Names.GAME_2, championship=champ)
+                    game_to_update_upper = Game.objects.get(phase=Phase.SEMI_UPPER, name=Names.GAME_2, championship=champ)
+                    game_to_update_lower = Game.objects.get(phase=Phase.SEMI_LOWER_1, name=Names.GAME_2, championship=champ)
                     if game_to_update_upper.team_1 == None:
                         game_to_update_upper.team_1 = winner_id
                         game_to_update_upper.save()
@@ -124,8 +131,8 @@ def update_games():
                         winner_id = game.team_2
                         looser_id = game.team_1
                     
-                    game_to_update_upper = Game.objects.filter(phase=Phase.SEMI_UPPER, name=Names.GAME_2, championship=champ)
-                    game_to_update_lower = Game.objects.filter(phase=Phase.SEMI_LOWER_1, name=Names.GAME_2, championship=champ)
+                    game_to_update_upper = Game.objects.get(phase=Phase.SEMI_UPPER, name=Names.GAME_2, championship=champ)
+                    game_to_update_lower = Game.objects.get(phase=Phase.SEMI_LOWER_1, name=Names.GAME_2, championship=champ)
                     if game_to_update_upper.team_2 == None:
                         game_to_update_upper.team_2 = winner_id
                         game_to_update_upper.save()
@@ -145,8 +152,8 @@ def update_games():
                         winner_id = game.team_2
                         looser_id = game.team_1
                     
-                    game_to_update_upper = Game.objects.filter(phase=Phase.FINAL_UPPER, name=Names.GAME_1, championship=champ)
-                    game_to_update_lower = Game.objects.filter(phase=Phase.SEMI_LOWER_2, name=Names.GAME_1, championship=champ)
+                    game_to_update_upper = Game.objects.get(phase=Phase.FINAL_UPPER, name=Names.GAME_1, championship=champ)
+                    game_to_update_lower = Game.objects.get(phase=Phase.SEMI_LOWER_2, name=Names.GAME_1, championship=champ)
                     if game_to_update_upper.team_1 == None:
                         game_to_update_upper.team_1 = winner_id
                         game_to_update_upper.save()
@@ -164,8 +171,8 @@ def update_games():
                         winner_id = game.team_2
                         looser_id = game.team_1
                         
-                    game_to_update_upper = Game.objects.filter(phase=Phase.FINAL_UPPER, name=Names.GAME_1, championship=champ)
-                    game_to_update_lower = Game.objects.filter(phase=Phase.SEMI_LOWER_2, name=Names.GAME_2, championship=champ)
+                    game_to_update_upper = Game.objects.get(phase=Phase.FINAL_UPPER, name=Names.GAME_1, championship=champ)
+                    game_to_update_lower = Game.objects.get(phase=Phase.SEMI_LOWER_2, name=Names.GAME_2, championship=champ)
                     if game_to_update_upper.team_2 == None:
                         game_to_update_upper.team_2 = winner_id
                         game_to_update_upper.save()
@@ -184,8 +191,8 @@ def update_games():
                     winner_id = game.team_2
                     looser_id = game.team_1
                     
-                game_to_update_upper = Game.objects.filter(phase=Phase.FINAL_CHAMPIONS, name=Names.GAME_1, championship=champ)
-                game_to_update_lower = Game.objects.filter(phase=Phase.FINAL_LOWER_2, name=Names.GAME_1, championship=champ)
+                game_to_update_upper = Game.objects.get(phase=Phase.FINAL_CHAMPIONS, name=Names.GAME_1, championship=champ)
+                game_to_update_lower = Game.objects.get(phase=Phase.FINAL_LOWER_2, name=Names.GAME_1, championship=champ)
                 if game_to_update_upper.team_1 == None:
                         game_to_update_upper.team_1 = winner_id
                         game_to_update_upper.save()
@@ -206,7 +213,7 @@ def update_games():
                         winner_id = game.team_2
                         looser_id = game.team_1
                         
-                    game_to_update_continue_lower = Game.objects.filter(phase=Phase.SEMI_LOWER_2, name=Names.GAME_1, championship=champ)
+                    game_to_update_continue_lower = Game.objects.get(phase=Phase.SEMI_LOWER_2, name=Names.GAME_1, championship=champ)
                     if game_to_update_continue_lower.team_2 == None:
                         game_to_update_continue_lower.team_2 = winner_id
                         game_to_update_continue_lower.save()
@@ -222,7 +229,7 @@ def update_games():
                         winner_id = game.team_2
                         looser_id = game.team_1
                         
-                    game_to_update_continue_lower = Game.objects.filter(phase=Phase.SEMI_LOWER_2, name=Names.GAME_2, championship=champ)
+                    game_to_update_continue_lower = Game.objects.get(phase=Phase.SEMI_LOWER_2, name=Names.GAME_2, championship=champ)
                     if game_to_update_continue_lower.team_2 == None:
                         game_to_update_continue_lower.team_2 = winner_id
                         game_to_update_continue_lower.save()
@@ -240,7 +247,7 @@ def update_games():
                         winner_id = game.team_2
                         looser_id = game.team_1
                         
-                    game_to_update_continue_lower = Game.objects.filter(phase=Phase.FINAL_LOWER_1, name=Names.GAME_1, championship=champ)
+                    game_to_update_continue_lower = Game.objects.get(phase=Phase.FINAL_LOWER_1, name=Names.GAME_1, championship=champ)
                     if game_to_update_continue_lower.team_1 == None:
                         game_to_update_continue_lower.team_1 = winner_id
                         game_to_update_continue_lower.save()
@@ -256,7 +263,7 @@ def update_games():
                         winner_id = game.team_2
                         looser_id = game.team_1
                         
-                    game_to_update_continue_lower = Game.objects.filter(phase=Phase.FINAL_LOWER_1, name=Names.GAME_1, championship=champ)
+                    game_to_update_continue_lower = Game.objects.get(phase=Phase.FINAL_LOWER_1, name=Names.GAME_1, championship=champ)
                     if game_to_update_continue_lower.team_2 == None:
                         game_to_update_continue_lower.team_2 = winner_id
                         game_to_update_continue_lower.save()
@@ -272,7 +279,7 @@ def update_games():
                     winner_id = game.team_2
                     looser_id = game.team_1
                         
-                game_to_update_continue_lower = Game.objects.filter(phase=Phase.FINAL_LOWER_2, name=Names.GAME_1, championship=champ)
+                game_to_update_continue_lower = Game.objects.get(phase=Phase.FINAL_LOWER_2, name=Names.GAME_1, championship=champ)
                 if game_to_update_continue_lower.team_2 == None:
                     game_to_update_continue_lower.team_2 = winner_id
                     game_to_update_continue_lower.save()
@@ -288,7 +295,7 @@ def update_games():
                     winner_id = game.team_2
                     looser_id = game.team_1
                         
-                game_to_update_continue_lower = Game.objects.filter(phase=Phase.FINAL_CHAMPIONS, name=Names.GAME_1, championship=champ)
+                game_to_update_continue_lower = Game.objects.get(phase=Phase.FINAL_CHAMPIONS, name=Names.GAME_1, championship=champ)
                 if game_to_update_continue_lower.team_2 == None:
                     game_to_update_continue_lower.team_2 = winner_id
                     game_to_update_continue_lower.save()
