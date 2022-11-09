@@ -33,16 +33,13 @@ class ChampionshipModelTest(TestCase):
         # testar se jogos estão vazios
         # testar relacionamento com user, se retorna staff_owner_id
         user = User.objects.create_user(**self.user_staff)
-        token_staff = Token.objects.create(user=user)
 
-        client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff}")
-        response = client.post("/api/championships/register/", self.championship)
+        champ = Championship.objects.create(**self.championship, staff_owner=user)
 
-        champ = Championship.objects.get(staff_owner=user)
+        self.assertEqual(self.championship["name"], champ.name)
+        self.assertEqual(self.championship["initial_date"], champ.initial_date)
+        self.assertEqual(self.championship["e_sport"], champ.e_sport)
+        self.assertEqual(self.championship["entry_amount"], champ.entry_amount)
+        self.assertEqual(self.championship["prize"], champ.prize)
+        self.assertIsInstance(champ.staff_owner, User)
 
-        games_queryset_size = champ.games.count()
-        game_instance = champ.games.last()
-        
-        self.assertEqual(14, games_queryset_size)
-        self.assertIsInstance(game_instance, Game)
-        self.assertEqual(201, response.status_code)

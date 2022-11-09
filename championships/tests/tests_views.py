@@ -6,6 +6,7 @@ from users.models import User
 from django.forms.models import model_to_dict
 from games.models import Game
 from teams.models import Team
+from historys.models import History
 
 client = APIClient()
 
@@ -164,7 +165,8 @@ class ChampionshipViewTest(TestCase):
         }        
 
         cls.transaction = {
-            "value": 1000
+            "value": 1000,
+            "detail": "Deposit"
         }
 
         
