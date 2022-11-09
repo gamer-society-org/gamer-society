@@ -3,7 +3,6 @@ from championships.models import Championship
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from users.models import User
-import ipdb
 from django.forms.models import model_to_dict
 from games.models import Game
 from teams.models import Team
@@ -237,9 +236,6 @@ class ChampionshipViewTest(TestCase):
 
         client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff.pk}")
         response_staff = client.delete(f"/api/championships/{champ_id}/delete/")
-
-        # import ipdb
-        # ipdb.set_trace()
 
         self.assertEqual(403, response_staff2.status_code)
         self.assertEqual(204, response_staff.status_code)
