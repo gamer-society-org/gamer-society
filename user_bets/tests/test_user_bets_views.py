@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 from historys.models import History
 from bet_types.models import BetType
 from transactions.models import Transaction
+from user_bets.models import UserBet
 
 client = APIClient()
 
@@ -135,8 +136,7 @@ class UserBetTestView(TestCase):
             "bet_type": bet_type[0].id,
         }
 
-        user_betted = client.post(
-            f"/api/games/{games[0].id}/bet/{bet_type[0].team}/", user_bet_data
-        )
+        client.post(f"/api/games/{games[0].id}/bet/{bet_type[0].team}/", user_bet_data)
 
-        ipdb.set_trace()
+        self.assertEqual(1, len(UserBet.objects.all()))
+        self.assertEqual(2000, UserBet.objects.all()[0].value)

@@ -10,7 +10,7 @@ class HasMoneyToBet(permissions.BasePermission):
         user_balance = request.user.history.balance
         user_bet = request.data["value"]
 
-        return user_balance > user_bet
+        return user_balance > float(user_bet)
 
 
 class UserToBetIsInGame(permissions.BasePermission):
@@ -62,10 +62,10 @@ class UserToBetIsStaffFromChampionship(permissions.BasePermission):
         self.message = "Not allowed to bet in games that you're staff"
 
         return game.championship.staff_owner_id != request.user.id
-    
+
+
 class CanBetAboveZeroChampionship(permissions.BasePermission):
     def has_permission(self, request, view):
         self.message = "Not allowed to bet zero units, must bet above zero"
 
-        return (request.data['value'] > 0)
-    
+        return float(request.data["value"]) > 0
