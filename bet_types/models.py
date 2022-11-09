@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 
+
 class BetType(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     total_value = models.FloatField(blank=True, default=0.0)
