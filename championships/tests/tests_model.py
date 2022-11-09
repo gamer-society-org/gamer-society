@@ -7,6 +7,7 @@ from games.models import Game
 
 client = APIClient()
 
+
 class ChampionshipModelTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -24,13 +25,13 @@ class ChampionshipModelTest(TestCase):
             "initial_date": "2022-11-22",
             "e_sport": "Valorant",
             "entry_amount": 10.0,
-            "prize": 75.0
+            "prize": 75.0,
         }
-        
+
     def test_create_champ_model(self):
-        #testar se cria 11 jogos
-            #testar se jogos estão vazios
-        #testar relacionamento com user, se retorna staff_owner_id
+        # testar se cria 11 jogos
+        # testar se jogos estão vazios
+        # testar relacionamento com user, se retorna staff_owner_id
         user = User.objects.create_user(**self.user_staff)
         token_staff = Token.objects.create(user=user)
 
@@ -45,4 +46,3 @@ class ChampionshipModelTest(TestCase):
         self.assertEqual(14, games_queryset_size)
         self.assertIsInstance(game_instance, Game)
         self.assertEqual(201, response.status_code)
-
