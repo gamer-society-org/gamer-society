@@ -22,11 +22,7 @@ class TeamTestClass(TestCase):
             'initials': 'PNG',
             'e_sport': 'League of Legends'
         }
-        # cls.team_in_champ_model = {
-        #     'name': 'Pain Gaming',
-        #     'initials': 'PNG',
-        #     'e_sports': 'League of Legends'
-        # }
+
         cls.not_in_championship_team_created = {
             'id': str,
             'name': 'Pain Gaming',
@@ -36,13 +32,6 @@ class TeamTestClass(TestCase):
             'e_sport': 'League of Legends',
             'championship': 'Is not in a championship'
         }
-        # cls.in_championship_team_created = {
-        #     'id': str,
-        #     'name': 'Pain Gaming',
-        #     'initials': 'PNG',
-        #     'e_sports': 'League of Legends',
-        #     'championship': 
-        # }
 
     def test_team_model(self):
 

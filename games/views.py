@@ -1,6 +1,5 @@
 from rest_framework import generics
 from rest_framework.authentication import TokenAuthentication
-from utils.permissions import IsStaff
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .permissions import (
@@ -11,10 +10,10 @@ from .permissions import (
     IsInitialDateInFuture,
     IsThere8TeamsInCamp,
     IsValidTeam,
-    IsTeam1And2TheSame
-
+    IsTeam1And2TheSame,
+    IsWinnerOneOfGameTeams,
 )
-
+from user_bets.models import UserBet
 from utils.mixins import SerializerByMethodMixin
 from .models import Game
 from bet_types.models import BetType
@@ -45,7 +44,7 @@ class UpdateTeamsGameView(generics.UpdateAPIView):
         IsDateAfterChampInitialDate,
         IsInitialDateInFuture,
         IsValidTeam,
-        IsTeam1And2TheSame
+        IsTeam1And2TheSame,
     ]
 
     lookup_url_kwarg = "game_id"
@@ -54,23 +53,16 @@ class UpdateTeamsGameView(generics.UpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         game = self.update(request, *args, **kwargs)
-        game_obj = Game.objects.get(id=game.data['id'])
+        game_obj = Game.objects.get(id=game.data["id"])
 
         game.data["championship"]
-        bet = {
-            "team_1": game.data["team_1"],
-            "team_2": game.data["team_2"]
-        }
+        bet = {"team_1": game.data["team_1"], "team_2": game.data["team_2"]}
         bet_created = Bet.objects.create(**bet, game=game_obj)
-        bet_type_1 = {
-            "team": game.data["team_1"]
-        }
-        bet_type_2 = {
-            "team": game.data["team_2"]
-        }
+        bet_type_1 = {"team": game.data["team_1"]}
+        bet_type_2 = {"team": game.data["team_2"]}
         BetType.objects.create(**bet_type_1, bet=bet_created)
         BetType.objects.create(**bet_type_2, bet=bet_created)
-        
+
         return game
 
     def check_has_date_permission(self, request, obj):
@@ -98,15 +90,41 @@ class UpdateTeamsGameView(generics.UpdateAPIView):
 
 class UpdateGameWinnerView(generics.UpdateAPIView):
     authentication_classes = [TokenAuthentication]
-    permission_classes = [RequestMethodIsPut, IsStaffCampOwner, HasTeamsOnGame]
+    #ver se winner passado é um dos times
+    permission_classes = [RequestMethodIsPut, IsStaffCampOwner, HasTeamsOnGame, IsWinnerOneOfGameTeams]
     lookup_url_kwarg = "game_id"
     queryset = Game.objects.all()
     serializer_class = GameWinnerSerializer
 
-    def patch(self, request, *args, **kwargs):
-        game = self.partial_update(request, *args, **kwargs)
-        # ipdb.set_trace()
+    def put(self, request, *args, **kwargs):
+        game = self.update(request, *args, **kwargs)
+
+        game_obj = Game.objects.get(id=game.data["id"])
+        bet = Bet.objects.get(game=game_obj)
+        bet.winner = game_obj.winner
+        bet.save()
+        bet_type_winner = BetType.objects.get(bet=bet, team=game_obj.winner)
+        bet_type_looser = BetType.objects.exclude(team=game_obj.winner).get(bet=bet)
+        bet_type_winner.winner = game_obj.winner
+        bet_type_looser.winner = game_obj.winner
+        bet_type_winner.save()
+        users_bet = UserBet.objects.filter(bet_type=bet_type_winner)
+
+        odd = bet_type_winner.odd
+
         champ = Championship.objects.get(id=game.data["championship"])
+
+        for user_b in users_bet:
+            value = user_b.value
+            user = User.objects.get(id=user_b.user.id)
+            prize = {
+                "value": value * odd,
+                "detail": f"Prêmio da aposta: {champ.name} - {game_obj.phase} {game_obj.name}",
+            }
+            trans = TransactionSerializer(data=prize)
+            trans.is_valid(raise_exception=True)
+            trans.save(user=user)
+
         if game.data["winner"] == game.data["team_1"]:
             team_1_winner = Team.objects.get(id=game.data["team_1"])
             team_1_winner.wins += 1
@@ -140,13 +158,15 @@ class UpdateGameWinnerView(generics.UpdateAPIView):
                 if user.is_team_owner:
                     user_to_reward = User.objects.get(id=user.id)
 
-            prize = {"value": champ.prize}
+            prize = {
+                "value": champ.prize,
+                "detail": f"Vitória no campeonato: {champ.name}",
+            }
 
             trans = TransactionSerializer(data=prize)
             trans.is_valid(raise_exception=True)
             trans.save(user=user_to_reward)
 
-        # ipdb.set_trace()
         # TRIGGER TO CLOSE GAME BET AND GIVE MONEY
 
         return game

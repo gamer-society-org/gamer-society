@@ -4,7 +4,6 @@ from championships.models import Championship
 from teams.models import Team
 from games.models import Game
 from bets.models import Bet
-import ipdb
 
 
 class BetTestModel(TestCase):
