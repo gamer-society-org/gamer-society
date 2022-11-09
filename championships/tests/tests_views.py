@@ -137,9 +137,8 @@ class ChampionshipViewTest(TestCase):
             "initial_date": "2022-11-22",
             "e_sport": "Valorant",
             "winner": str,
-            "staff_owner": object,
-            "teams": [Team],
-            "games": [Game]
+            "games": [Game],
+            "teams": [Team]
         }
 
         cls.championship_wrong_keys = {
@@ -153,7 +152,7 @@ class ChampionshipViewTest(TestCase):
         cls.team_model = {
             'name': 'Pain Gaming',
             'initials': 'PNG',
-            'e_sports': 'League of Legends'
+            'e_sport': 'Valorant'
         }
 
         cls.players_to_add = {
@@ -163,6 +162,10 @@ class ChampionshipViewTest(TestCase):
             "username3": "Clara",
             "username4": "Jonas",
         }        
+
+        cls.transaction = {
+            "value": 1000
+        }
 
         
     def test_create_champ_with_wrong_keys(self):
@@ -199,8 +202,9 @@ class ChampionshipViewTest(TestCase):
         #testar length de teams = 0
         self.assertEqual(0, champ.teams.count())
         #testar length de games = 11
-        self.assertEqual(11, champ.games.count())
+        self.assertEqual(14, champ.games.count())
         #testar length de keys() = 9
+
         expected_champ_keys = list(self.championship_return.keys())
         recieved_champ_keys = response.json().keys()
         self.assertEqual(len(expected_champ_keys), len(recieved_champ_keys))
@@ -212,35 +216,41 @@ class ChampionshipViewTest(TestCase):
         
     def test_champ_delete(self):
         #somente owner, testar se qualquer um pode
-        user_staff = User.objects.create_user(**self.user_staff)
+        # user_staff = User.objects.create_user(**self.user_staff)
+        response_create_staff = client.post("/api/users/register/", self.user_staff)
+        user_staff = User.objects.get(id=response_create_staff.data["id"])
         token_staff = Token.objects.create(user=user_staff)
 
-        client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff}")
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff.pk}")
         response = client.post("/api/championships/register/", self.championship)
 
-        champ_id = response.json()["id"]
+        champ_id = response.data["id"]
 
-        user_staff2 = User.objects.create_user(**self.user_staff2)
+        # user_staff2 = User.objects.create_user(**self.user_staff2)
+        response_create_staff2 = client.post("/api/users/register/", self.user_staff2)
+        user_staff2 = User.objects.get(id=response_create_staff2.data["id"])
         token_staff2 = Token.objects.create(user=user_staff2)
 
-        client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff2}")
-        response_staff2 = client.delete(f"/api/championships/{champ_id}/management/")
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff2.pk}")
+        response_staff2 = client.delete(f"/api/championships/{champ_id}/delete/")
 
-        client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff}")
-        response_staff = client.delete(f"/api/championships/{champ_id}/management/")
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff.pk}")
+        response_staff = client.delete(f"/api/championships/{champ_id}/delete/")
 
         self.assertEqual(403, response_staff2.status_code)
         self.assertEqual(204, response_staff.status_code)
         
     def test_list_one_championship_results(self):
 
-        user_staff = User.objects.create_user(**self.user_staff)
+        # user_staff = User.objects.create_user(**self.user_staff)
+        response_create_staff = client.post("/api/users/register/", self.user_staff)
+        user_staff = User.objects.get(id=response_create_staff.data["id"])
         token_staff = Token.objects.create(user=user_staff)
 
-        client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff}")
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff.pk}")
         response = client.post("/api/championships/register/", self.championship)
 
-        champ_id = response.json()["id"]
+        champ_id = response.data["id"]
 
         response_get = client.get(f"/api/championships/{champ_id}/")
 
@@ -257,7 +267,7 @@ class ChampionshipViewTest(TestCase):
         response = client.get("/api/championships/list/")
 
         expected_champ_keys = list(self.championship_return_list.keys())
-        recieved_champ_keys = list(response.json()[0].keys())
+        recieved_champ_keys = list(response.data[0].keys())
 
         self.assertEqual(len(expected_champ_keys), len(recieved_champ_keys))
         
@@ -274,19 +284,20 @@ class ChampionshipViewTest(TestCase):
 
         user = User.objects.create_user(**self.user_staff)
         token_staff = Token.objects.create(user=user)
-        amount_before_entry = user_player.history.balance
 
         client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff}")
         response_post = client.post("/api/championships/register/", self.championship)
 
-        champ_id = response_post.json()["id"]
+        champ_id = response_post.data["id"]
 
         client.credentials(HTTP_AUTHORIZATION=f"Token {token_staff}")
         response_post_champ_2 = client.post("/api/championships/register/", self.championship_other_data)
 
-        champ2_id = response_post_champ_2.json()["id"]
+        champ2_id = response_post_champ_2.data["id"]
 
-        user_player = User.objects.create_user(**self.user_player)
+        response_create_player = client.post("/api/users/register/", self.user_player)
+        player_id = response_create_player.data["id"]
+        user_player = User.objects.get(id=player_id)
         token_player = Token.objects.create(user=user_player)
 
         client.credentials(HTTP_AUTHORIZATION=f"Token {token_player}")
@@ -301,13 +312,17 @@ class ChampionshipViewTest(TestCase):
         response_to_many_players = client.patch(f"/api/teams/add/{team_id}/", self.players_to_add)
 
         client.credentials(HTTP_AUTHORIZATION=f"Token {token_player}")
+        response_transaction = client.post(f"/api/transactions/", data=self.transaction)
+
+        amount_before_entry = History.objects.get(id=user_player.history.id).balance
+
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token_player}")
         response_adding_team_in_champ = client.patch(f"/api/championships/{champ_id}/add-teams/{team_id}/")
 
-        amount_after_entry = user_player.history.balance
+        amount_after_entry = History.objects.get(id=user_player.history.id).balance
 
         client.credentials(HTTP_AUTHORIZATION=f"Token {token_player}")
         response_adding_team_in_champ_in_one_days = client.patch(f"/api/championships/{champ2_id}/add-teams/{team_id}/")
-
 
         self.assertEqual(200, response_adding_team_in_champ.status_code)
         self.assertEqual(403, response_adding_team_in_champ_in_one_days.status_code)
